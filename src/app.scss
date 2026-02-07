@@ -1,0 +1,169 @@
+@font-face {
+  font-family: 'Chalk';
+  src: url('assets/fonts/Chalk-Regular.ttf');
+}
+html,
+body {
+  margin: 0; /* Prevents margin that may affect the display */
+  height: 100%; /* Ensures full-height for the background */
+}
+
+.page-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(0deg, rgba(34, 105, 120, 1) 0%, rgba(186, 186, 186, 1) 73%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  position: relative;
+}
+
+body {
+  font-family: 'Chalk';
+}
+// Then import Bootstrap and BootstrapVue SCSS files (order is important)
+// @import 'node_modules/bootstrap/scss/bootstrap.scss';
+// @import 'node_modules/bootstrap-vue/src/index.scss';
+.snowflake {
+  position: absolute;
+  color: white;
+  animation: fall linear forwards;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(50vh) translateX(var(--drift, 30px))
+      rotate(calc(var(--rotation, 360deg) / 2));
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(0) rotate(var(--rotation, 360deg));
+  }
+}
+.full-screen {
+  min-height: 100vh; /* fallback */
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  justify-content: center;
+  position: relative;
+}
+
+/* Fix 100vh issue on iOS/Android browsers */
+@supports (-webkit-touch-callout: none) {
+  .full-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Optional: Smooth animation */
+.full-screen.show {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.full-screen.hide {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.scraper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 200%; /* double width to hold 2 images */
+  height: 40vh;
+  background: url('/img/eeuo_0n2a_230116-removebg-preview.png') repeat-x;
+  background-size: auto 100%;
+  animation: scroll-background 80s linear infinite; /* slower default */
+  will-change: background-position;
+
+  background-position: 0px 10px;
+  z-index: 0;
+  pointer-events: none; /* 👈 ensures it's not clickable */
+}
+
+/* Base responsive speed variable */
+:root {
+  --scroll-speed: 25s; /* base for small screens */
+}
+
+@media (min-width: 768px) {
+  :root {
+    --scroll-speed: 40s;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --scroll-speed: 60s;
+  }
+}
+.scraper1,
+.scraper2 {
+  opacity: 0;
+}
+.scraper1 {
+  opacity: 0;
+  z-index: 2; /* keep behind content */
+  animation:
+    fade-in 1s ease-out forwards,
+    smooth-marquee1 var(--scroll-speed) linear infinite 1s;
+  will-change: background-position, opacity;
+  pointer-events: none;
+}
+
+.scraper2 {
+  opacity: 0;
+  bottom: -20px;
+  z-index: 1; /* further behind */
+  filter: brightness(45%);
+  animation:
+    fade-in 1.5s ease-out forwards,
+    smooth-marquee2 calc(var(--scroll-speed) * 1.5) linear infinite 1.5s;
+  will-change: background-position, opacity;
+  pointer-events: none;
+}
+
+/* Keyframes */
+@keyframes smooth-marquee1 {
+  0% {
+    background-position: 0px 10px;
+  }
+  100% {
+    background-position: -100% 10px; /* Ensure smooth transition */
+  }
+}
+
+@keyframes smooth-marquee2 {
+  0% {
+    background-position: 0px 10px;
+  }
+  100% {
+    background-position: -100% 10px; /* Ensure smooth transition */
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.white-box {
+  background: rgba(255, 255, 255, 0.4); /* transparent white */
+  backdrop-filter: blur(2px); /* applies blur to the background behind it */
+  -webkit-backdrop-filter: blur(2); /* Safari support */
+  border-radius: 12px; /* optional */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* optional subtle border */
+}

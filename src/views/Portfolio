@@ -1,0 +1,234 @@
+<template>
+  <div class="p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Pinterest-style Masonry Grid</h3>
+      <div>
+        <button class="btn btn-sm btn-outline-primary me-2" @click="shuffle">Shuffle</button>
+        <button class="btn btn-sm btn-outline-secondary" @click="toggleColumns">Columns: {{ columns }}</button>
+      </div>
+    </div>
+
+    <!-- Masonry container using CSS columns -->
+    <div :class="['masonry', 'gap-3']" :style="masonryStyle">
+      <article
+        v-for="(item, idx) in items"
+        :key="item.id || idx"
+        class="masonry-item card mb-3"
+        @click="openLightbox(idx)"
+        role="button"
+        aria-label="Open image"
+      >
+        <img
+          :src="item.image"
+          :alt="item.title"
+          class="card-img-top"
+          loading="lazy"
+        />
+        <div class="card-body p-2">
+          <h6 class="card-title mb-1">{{ item.title }}</h6>
+          <p class="card-text small text-muted mb-2">{{ item.description }}</p>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <button class="btn btn-sm btn-outline-danger me-2" @click.stop="toggleLike(item)">
+                <i :class="['bi', item.liked ? 'bi-heart-fill' : 'bi-heart']"></i>
+                <small class="ms-1">{{ item.likes }}</small>
+              </button>
+            </div>
+            <small class="text-muted">{{ item.author }}</small>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Lightbox modal (simple Vue implementation) -->
+    <div v-if="lightbox.open" class="lightbox" @click.self="closeLightbox">
+      <div class="lightbox-inner card shadow-lg">
+        <img :src="lightbox.item.image" :alt="lightbox.item.title" class="img-fluid" />
+        <div class="card-body">
+          <h5>{{ lightbox.item.title }}</h5>
+          <p class="small text-muted mb-2">by {{ lightbox.item.author }}</p>
+          <p>{{ lightbox.item.description }}</p>
+          <div class="d-flex justify-content-between">
+            <div>
+              <button class="btn btn-sm btn-outline-danger me-2" @click="toggleLike(lightbox.item)">
+                <i :class="['bi', lightbox.item.liked ? 'bi-heart-fill' : 'bi-heart']"></i>
+                <span class="ms-1">{{ lightbox.item.likes }}</span>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" @click="closeLightbox">Close</button>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-outline-primary" @click="prev">Prev</button>
+              <button class="btn btn-sm btn-outline-primary ms-2" @click="next">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive, ref, computed } from 'vue'
+
+// Demo data; replace with your own API/data in production
+const items = reactive([
+  {
+    id: 1,
+    image: 'https://picsum.photos/seed/1/600/900',
+    title: 'Cozy nook',
+    description: 'A warm, inviting corner with plants and soft light.',
+    author: 'Ava',
+    likes: 12,
+    liked: false,
+  },
+  {
+    id: 2,
+    image: 'https://picsum.photos/seed/2/600/700',
+    title: 'City geometry',
+    description: 'Lines and glass reflections in the urban jungle.',
+    author: 'Liam',
+    likes: 34,
+    liked: true,
+  },
+  {
+    id: 3,
+    image: 'https://picsum.photos/seed/3/600/400',
+    title: 'Minimal desk',
+    description: 'Less is more — clean lines and a focused space.',
+    author: 'Maya',
+    likes: 8,
+    liked: false,
+  },
+  {
+    id: 4,
+    image: 'https://picsum.photos/seed/4/600/850',
+    title: 'Winding path',
+    description: 'Forest trails and golden hour light.',
+    author: 'Noah',
+    likes: 21,
+    liked: false,
+  },
+  {
+    id: 5,
+    image: 'https://picsum.photos/seed/5/600/500',
+    title: 'Ceramic still life',
+    description: 'Textures and soft shadows make a calm composition.',
+    author: 'Zoe',
+    likes: 5,
+    liked: false,
+  },
+  {
+    id: 6,
+    image: 'https://picsum.photos/seed/6/600/1100',
+    title: 'Tall architecture',
+    description: 'Verticality emphasized with low-angle perspective.',
+    author: 'Ethan',
+    likes: 44,
+    liked: true,
+  },
+])
+
+// For demo we store on local reactive reference
+const itemsRef = items
+
+const columns = ref(3)
+
+const masonryStyle = computed(() => ({
+  columnCount: columns.value,
+  columnGap: '1rem',
+}))
+
+const lightbox = reactive({ open: false, index: 0, item: null })
+
+function openLightbox(index) {
+  lightbox.index = index
+  lightbox.item = itemsRef[index]
+  lightbox.open = true
+}
+
+function closeLightbox() {
+  lightbox.open = false
+  lightbox.item = null
+}
+
+function prev() {
+  if (lightbox.index > 0) openLightbox(lightbox.index - 1)
+}
+function next() {
+  if (lightbox.index < itemsRef.length - 1) openLightbox(lightbox.index + 1)
+}
+
+function toggleLike(item) {
+  item.liked = !item.liked
+  item.likes += item.liked ? 1 : -1
+}
+
+function shuffle() {
+  for (let i = itemsRef.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[itemsRef[i], itemsRef[j]] = [itemsRef[j], itemsRef[i]]
+  }
+}
+
+function toggleColumns() {
+  columns.value = columns.value === 3 ? 2 : columns.value === 2 ? 1 : 3
+}
+</script>
+
+<style scoped>
+/* Masonry using CSS columns. Each item must be inline-block to avoid breaking column flow */
+.masonry {
+  /* these are overridden by inline style for column-count */
+  column-gap: 1rem;
+  width: 100%;
+}
+.masonry-item {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 1rem;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.masonry-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.12);
+}
+.card-img-top {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-top-left-radius: .375rem;
+  border-top-right-radius: .375rem;
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+.lightbox-inner {
+  max-width: 900px;
+  width: 100%;
+}
+.lightbox-inner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsive tweaks */
+@media (max-width: 1199px) {
+  /* reduce columns on smaller screens */
+  .masonry { column-count: 2 !important; }
+}
+@media (max-width: 767px) {
+  .masonry { column-count: 1 !important; }
+}
+</style>
